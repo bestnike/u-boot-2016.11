@@ -82,6 +82,17 @@ ENTRY(_main)
 #else
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
 #endif
+	bl nand_init_ll
+	mov r0, #0
+	ldr r1, =_start
+	ldr r2, =__bss_start
+	sub r2, r2, r1
+	ldr r1, =CONFIG_SYS_TEXT_BASE
+	bl copy_code_to_sdram
+	bl clear_bss
+	ldr pc, =START_ON_RAM
+
+START_ON_RAM:
 	mov	r0, sp
 	bl	board_init_f_alloc_reserve
 	mov	sp, r0
@@ -91,6 +102,7 @@ ENTRY(_main)
 
 	mov	r0, #0
 	bl	board_init_f
+	str r1, [r0]
 
 #if ! defined(CONFIG_SPL_BUILD)
 
@@ -118,17 +130,19 @@ ENTRY(_main)
 	orr	lr, #1				/* As required by Thumb-only */
 #endif
 	ldr	r0, [r9, #GD_RELOCADDR]		/* r0 = gd->relocaddr */
-	b	relocate_code
+	//b	relocate_code
+	ldr r2, =__rel_dyn_start
+	ldr r3, =__rel_dyn_end
 here:
 /*
  * now relocate vectors
  */
 
-	bl	relocate_vectors
+	//bl	relocate_vectors
 
 /* Set up final (full) environment */
 
-	bl	c_runtime_cpu_setup	/* we still call old routine here */
+	//bl	c_runtime_cpu_setup	/* we still call old routine here */
 #endif
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_FRAMEWORK)
 # ifdef CONFIG_SPL_BUILD
@@ -138,7 +152,8 @@ here:
 	movne	sp, r0
 	movne	r9, r0
 # endif
-	ldr	r0, =__bss_start	/* this is auto-relocated! */
+
+	//ldr	r0, =__bss_start	/* this is auto-relocated! */
 
 #ifdef CONFIG_USE_ARCH_MEMSET
 	ldr	r3, =__bss_end		/* this is auto-relocated! */
