@@ -241,6 +241,7 @@ export	HOSTARCH HOSTOS
 
 #########################################################################
 
+CROSS_COMPILE = arm-linux-
 # set default to nothing for native builds
 ifeq ($(HOSTARCH),$(ARCH))
 CROSS_COMPILE ?=
